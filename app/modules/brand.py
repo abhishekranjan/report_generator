@@ -16,13 +16,14 @@ ENTITY_FIELD = "brand"
 def fields(df):
     fam = df["brand_family"].value_counts().index.tolist()
     sub = df.groupby(["brand_family", "brand"]).size().reset_index()
-    pins = df.groupby(["brand_family", "pincode"]).size().reset_index()
+    pins = df.groupby(["brand_family", "pincode", "pin_city"]).size().reset_index()
+    pin_labels = [f"{p} · {c}" if c else p for p, c in zip(pins["pincode"], pins["pin_city"])]
     return [
         field("brand", "Brand", "select", True, opts(fam), "The brand whose Blinkit brand page is analysed."),
         field("sub_brands", "Sub-brands", "multi", False,
               opts(sub["brand"], parents=sub["brand_family"]), "Leave empty to cover the whole range.", "brand"),
         field("pincodes", "Pincodes", "multi", False,
-              opts(pins["pincode"], parents=pins["brand_family"]), "Leave empty for every pincode crawled.", "brand"),
+              opts(pins["pincode"], pin_labels, pins["brand_family"]), "Leave empty for every pincode crawled.", "brand") | {"literal_only": True},
     ]
 
 
@@ -75,19 +76,23 @@ def build(df, p):
     sections.append(section("portfolio", "Portfolio mix", facts, ch, tb))
 
     # 2 availability by pincode
-    g = d.groupby("pincode").agg(listings=("sku", "size"), avail=("in_stock", "mean"), stores=("store_id", "nunique"))
+    g = d.groupby("pincode").agg(listings=("sku", "size"), avail=("in_stock", "mean"), stores=("store_id", "nunique"),
+                                 city=("pin_city", "first"))
     g["avail"] *= 100
     g = g[g["listings"] >= min(10, g["listings"].max())].sort_values("avail")
     if len(g) > 1:
         low = g[g["avail"] < 70]
-        facts = [f"In-stock rate ranges from {pct(g['avail'].iat[0])} (pincode {g.index[0]}) to "
-                 f"{pct(g['avail'].iat[-1])} (pincode {g.index[-1]}) across {len(g)} pincodes.",
+        name = lambda i: f"{g.index[i]}, {g['city'].iat[i]}" if g["city"].iat[i] else g.index[i]
+        facts = [f"In-stock rate ranges from {pct(g['avail'].iat[0])} (pincode {name(0)}) to "
+                 f"{pct(g['avail'].iat[-1])} (pincode {name(-1)}) across {len(g)} pincodes.",
                  f"{len(low)} pincode(s) sit below a 70% in-stock rate." if len(low) else
                  "Every pincode holds an in-stock rate of 70% or better."]
         w = g.head(n)
-        ch = chart("barh", f"Lowest in-stock pincodes (overall {pct(avail)})", w.index, w["avail"], "pct", xmax=100)
-        tb = table(["Pincode", "Stores", "Listings", "In stock"],
-                   [[i, cnt(r.stores), cnt(r.listings), pct(r.avail)] for i, r in w.iterrows()], [2, 1, 1, 1])
+        ch = chart("barh", f"Lowest in-stock pincodes (overall {pct(avail)})",
+                   [f"{i} {r.city}".strip() for i, r in w.iterrows()], w["avail"], "pct", xmax=100)
+        tb = table(["Pincode", "City", "Stores", "Listings", "In stock"],
+                   [[i, r.city, cnt(r.stores), cnt(r.listings), pct(r.avail)] for i, r in w.iterrows()], [1.2, 1.6, 1, 1, 1],
+                   ["l", "l", "r", "r", "r"])
         sections.append(section("pincode_availability", "Availability by pincode", facts, ch, tb))
 
     # 3 out-of-stock hotspots

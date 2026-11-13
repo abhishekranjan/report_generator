@@ -63,6 +63,22 @@ CITIES = [
 ]
 _CITY_ARR = np.array([[c[1], c[2]] for c in CITIES])
 
+# Indian PIN prefix -> city (4-digit prefixes win over 3-digit ones).
+PIN_CITY = {
+    "110": "Delhi", "121": "Faridabad", "122": "Gurugram", "140": "Mohali", "141": "Ludhiana", "143": "Amritsar",
+    "160": "Chandigarh", "2010": "Ghaziabad", "2013": "Noida", "201": "Ghaziabad", "208": "Kanpur", "226": "Lucknow",
+    "282": "Agra", "302": "Jaipur", "360": "Rajkot", "380": "Ahmedabad", "382": "Ahmedabad", "390": "Vadodara",
+    "395": "Surat", "400": "Mumbai", "401": "Mumbai region", "411": "Pune", "440": "Nagpur", "452": "Indore",
+    "462": "Bhopal", "500": "Hyderabad", "530": "Visakhapatnam", "560": "Bengaluru", "600": "Chennai",
+    "641": "Coimbatore", "682": "Kochi", "700": "Kolkata", "751": "Bhubaneswar", "781": "Guwahati", "800": "Patna",
+}
+
+
+def pin_city(pin) -> str:
+    p = str(pin or "")
+    return PIN_CITY.get(p[:4]) or PIN_CITY.get(p[:3]) or ""
+
+
 _lock = threading.Lock()
 _cache: dict = {"key": None, "frames": {}, "files": {}}
 
@@ -149,6 +165,7 @@ def _clean_brand_page(df):
     o["mrp"] = num(df["Mrp"])
     o["price"] = num(df["Price"])
     o["pincode"] = df["Pincode"].str.replace(",", "", regex=False)
+    o["pin_city"] = o["pincode"].map(pin_city)
     o["store_id"] = df["Store ID"]
     o["rank"] = num(df["Rank"])
     o["page"] = num(df["Page Number"])

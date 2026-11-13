@@ -227,13 +227,14 @@ def build_pdf(path, report: dict, narrative: dict, meta: dict) -> int:
         notes += [Paragraph(tx(d), st["small"], bulletText="•") for d in report["definitions"]]
         if meta.get("prompt"):
             notes.append(Paragraph(tx(f"Request: “{meta['prompt'][:400]}”"), st["small"]))
-    who = (f"Commentary written by {config.GEMINI_MODEL} from these computed figures; review before external distribution."
+    who = (f"Commentary written by {narrative.get('model') or config.GEMINI_MODEL} from these computed figures; review before external distribution."
            if narrative.get("source") == "gemini" else "Commentary assembled from the computed figures using standard templates.")
     notes.append(Paragraph(tx("All figures are calculated directly from the crawl data. " + who +
                               " Figures describe what was visible on the platform at crawl time, not sales."), st["small"]))
     story.append(KeepTogether(notes))
 
-    footer = f"{config.COMPANY_NAME}  ·  Prepared for {client}" if client else config.COMPANY_NAME
+    site = re.sub(r"^https?://|/+$", "", config.COMPANY_WEBSITE)
+    footer = "  ·  ".join(x for x in (config.COMPANY_NAME, site, f"Prepared for {client}" if client else "") if x)
 
     def _page(canvas, doc):
         canvas.saveState()

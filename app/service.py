@@ -91,5 +91,5 @@ def generate(prompt: str, mid: str, values: dict) -> dict:
     pages = pdf.build_pdf(path, report, narrative, meta)
     (config.OUTPUT_DIR / f"{rid}.name").write_text(filename, encoding="utf-8")
     return {"id": rid, "filename": filename, "title": narrative["title"], "headline": narrative["headline"],
-            "pages": pages, "narrative_source": narrative["source"], "warning": narrative.get("warning"),
+            "pages": pages, "narrative_source": narrative["source"], "model": narrative.get("model"), "warning": narrative.get("warning"),
             "url": f"/api/reports/{rid}"}

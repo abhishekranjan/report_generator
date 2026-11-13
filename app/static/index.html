@@ -183,7 +183,8 @@ $("go").onclick = async () => {
   try {
     const p = await api("/api/plan", { prompt });
     Object.assign(state, { prompt, module: p.module, fields: p.fields, values: p.values });
-    banner("warn2", p.warning);
+    const gaps = (p.unmatched || []).length ? "Not found in the data, so not applied: " + p.unmatched.join(", ") + ". The report will cover what is available – check the filters below." : "";
+    banner("warn2", [gaps, p.warning].filter(Boolean).join(" "));
     renderForm(p.missing);
     show(2);
   } catch (e) { banner("err1", e.message); }
@@ -274,7 +275,7 @@ $("form").onsubmit = async e => {
   try {
     const r = await api("/api/generate", { prompt: state.prompt, module: state.module, values });
     $("rTitle").textContent = r.title; $("rHead").textContent = r.headline;
-    $("rMeta").textContent = r.pages + " page" + (r.pages > 1 ? "s" : "") + " · " + r.filename + " · commentary: " + (r.narrative_source === "gemini" ? "written by Gemini" : "standard template");
+    $("rMeta").textContent = r.pages + " page" + (r.pages > 1 ? "s" : "") + " · " + r.filename + " · commentary: " + (r.narrative_source === "gemini" ? "written by " + (r.model || "Gemini") : "standard template");
     banner("warn3", r.warning);
     $("dl").href = r.url + "?download=1"; $("open").href = r.url;$("viewer").src = r.url + "#view=FitH";
     show(3);
