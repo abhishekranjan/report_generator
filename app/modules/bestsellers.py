@@ -8,6 +8,14 @@ NAME = "Amazon Bestseller Pulse"
 DATASET = "bestsellers"
 DESCRIPTION = ("What is winning on Amazon bestseller lists in one country: category overview, price points, rating "
                "and review depth, chart-toppers and low-review challengers breaking into the top 20.")
+CHANNEL = "Amazon"
+SECTIONS = [
+    ("categories", "Category overview", "Per bestseller list: products, median price, rating, review depth"),
+    ("ratings", "Rating profile", "Distribution of star ratings among bestsellers"),
+    ("review_depth", "Review depth by rank", "How review counts and price change from rank 1-10 to 51-100"),
+    ("chart_toppers", "Chart-toppers", "The #1 product of each list"),
+    ("challengers", "Low-review challengers in the top 20", "New entrants ranking high with few reviews"),
+]
 KEYWORDS = ["bestseller", "best seller", "best-selling", "top selling", "amazon", "top 100", "trending", "country",
             "international", "reviews", "ratings", "winning products"]
 ENTITY_FIELD = "country"
@@ -20,6 +28,8 @@ def fields(df):
         field("country", "Country", "select", True, opts(c), "Amazon marketplace to analyse."),
         field("categories", "Categories", "multi", False, opts(cats["category"], parents=cats["country"]),
               "Leave empty to cover every bestseller list crawled.", "country"),
+        field("rank_max", "Rank range", "select", False,
+              opts(["10", "20", "50"], ["Top 10 only", "Top 20 only", "Top 50 only"]), "Leave empty for the full top 100."),
     ]
 
 
@@ -30,6 +40,9 @@ def build(df, p):
     if as_list(p.get("categories")):
         d = d[d["category"].isin(as_list(p["categories"]))]
         scope.append("categories: " + ", ".join(as_list(p["categories"])))
+    if p.get("rank_max"):
+        d = d[d["rank"] <= int(p["rank_max"])]
+        scope.append(f"top {p['rank_max']} ranks only")
     if d.empty:
         raise ValueError("No rows match that country / filter combination.")
     cur = d["currency"].dropna().mode().iat[0] if d["currency"].notna().any() else ""

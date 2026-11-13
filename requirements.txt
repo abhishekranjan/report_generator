@@ -1,6 +1,7 @@
 pandas>=2.2
 matplotlib>=3.9
 reportlab>=4.2
+pypdfium2>=4.30
 google-genai>=1.0
 fastapi>=0.115
 uvicorn[standard]>=0.30

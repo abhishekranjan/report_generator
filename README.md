@@ -3,13 +3,24 @@
 Self-serve report / newsletter generator for e-commerce crawl data. A client types what they want to know,
 confirms a few details, and downloads a PDF.
 
+Two ways in:
+
 ```
-prompt ──► Gemini picks the report type and extracts parameters
-       ──► form: required fields (asked if missing) + optional fields
-       ──► pandas computes every figure from the crawl data
-       ──► Gemini writes the commentary around those figures
-       ──► PDF (report or newsletter)
+Talk to AI    describe ──► AI checks the request against the data, asks only what is missing
+                       ──► choose AI-designed layout or a predefined template (with preview)
+                       ──► confirm details ──► PDF
+
+Use Filters   pick a report template (with preview) ──► set filters ──► PDF
 ```
+
+Behind both: pandas computes every figure from the crawl data, Gemini writes the commentary (and, for
+AI-designed reports, picks which analyses to show, their order and headings).
+
+- Requests the data cannot serve (a brand, category, channel or metric that is not there) are refused with an
+  explanation and alternatives – nothing is substituted silently.
+- Filters: brand, sub-brand, category, competitors, city, pincode, product/SKU, keyword, country, rank range,
+  date range (presets or custom) and which analyses to include. Each report shows only the filters its data supports.
+- Templates live in `app/modules/__init__.py` (`TEMPLATES`); the assistant's rules are in `app/assistant.py`.
 
 Gemini never produces numbers and never sees raw rows: it receives the list of valid options (to route the
 request) and the aggregated figures (to write commentary). Without an API key the tool still works, using
@@ -27,8 +38,8 @@ Each one is built on one crawl dataset. Files are recognised by their columns, n
 | Search Visibility Tracker | Amazon search-results (SERP) crawl | Product | Keywords |
 | Store-Level Availability | Blinkit product-page crawl | Product | Cities |
 
-Every report also needs **Prepared for** and **Format** (report or newsletter); title, tone, rows per table
-and accent colour are optional.
+Presentation settings (prepared for, report or newsletter format, title, tone, rows per table, accent colour)
+are all optional.
 
 ## Setup
 
@@ -65,7 +76,8 @@ app/
   data.py        load, recognise and clean the crawl CSVs
   ingest.py      import raw exports into data/
   modules/       one file per report type (fields + all calculations)
-  llm.py         Gemini: prompt -> plan, figures -> commentary (+ fallbacks)
+  assistant.py   the conversational requirement-gathering assistant
+  llm.py         Gemini calls, option validation, commentary and AI layout (+ fallbacks)
   charts.py      matplotlib chart rendering
   pdf.py         PDF layout (ReportLab)
   service.py     orchestration

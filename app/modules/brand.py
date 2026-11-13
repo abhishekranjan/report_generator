@@ -8,7 +8,15 @@ NAME = "Brand Shelf Health"
 DATASET = "brand_page"
 DESCRIPTION = ("How one brand's full range shows up on Blinkit: assortment by sub-brand, in-stock rate by pincode, "
                "out-of-stock hotspots, discount depth and shelf position.")
-KEYWORDS = ["brand", "portfolio", "assortment", "sub-brand", "pincode", "out of stock", "oos", "availability",
+CHANNEL = "Blinkit"
+SECTIONS = [
+    ("portfolio", "Portfolio mix", "Sub-brand split: SKUs, listings, in-stock rate, discount, rating"),
+    ("pincode_availability", "Availability by pincode", "In-stock rate per pincode, weakest first"),
+    ("oos_hotspots", "Out-of-stock hotspots", "SKUs most often out of stock across stores"),
+    ("pricing", "Pricing and discounting", "Discount depth, deepest discounts, store-to-store price consistency"),
+    ("shelf_position", "Shelf position on the brand page", "Best-placed SKUs and whether they are in stock"),
+]
+KEYWORDS = ["health", "healthscore", "health score", "brand", "portfolio", "assortment", "sub-brand", "pincode", "out of stock", "oos", "availability",
             "stock", "discount", "blinkit", "shelf", "range"]
 ENTITY_FIELD = "brand"
 
@@ -18,10 +26,17 @@ def fields(df):
     sub = df.groupby(["brand_family", "brand"]).size().reset_index()
     pins = df.groupby(["brand_family", "pincode", "pin_city"]).size().reset_index()
     pin_labels = [f"{p} · {c}" if c else p for p, c in zip(pins["pincode"], pins["pin_city"])]
+    city = df[df["pin_city"] != ""].groupby(["brand_family", "pin_city"]).size().reset_index()
+    sku = df.groupby(["brand_family", "sku"]).agg(title=("title", "first"), qty=("quantity", "first")).reset_index().sort_values("title")
     return [
         field("brand", "Brand", "select", True, opts(fam), "The brand whose Blinkit brand page is analysed."),
         field("sub_brands", "Sub-brands", "multi", False,
               opts(sub["brand"], parents=sub["brand_family"]), "Leave empty to cover the whole range.", "brand"),
+        field("cities", "Cities", "multi", False, opts(city["pin_city"], parents=city["brand_family"]),
+              "Leave empty for every city crawled.", "brand"),
+        field("products", "Products / SKUs", "multi", False,
+              opts(sku["sku"], [f"{trunc(t, 60)} · {q}" for t, q in zip(sku["title"], sku["qty"])], sku["brand_family"]),
+              "Leave empty to cover every SKU.", "brand") | {"quoted_only": True},
         field("pincodes", "Pincodes", "multi", False,
               opts(pins["pincode"], pin_labels, pins["brand_family"]), "Leave empty for every pincode crawled.", "brand") | {"literal_only": True},
     ]
@@ -34,6 +49,12 @@ def build(df, p):
     if as_list(p.get("sub_brands")):
         d = d[d["brand"].isin(as_list(p["sub_brands"]))]
         scope.append("sub-brands: " + ", ".join(as_list(p["sub_brands"])))
+    if as_list(p.get("cities")):
+        d = d[d["pin_city"].isin(as_list(p["cities"]))]
+        scope.append("cities: " + ", ".join(as_list(p["cities"])))
+    if as_list(p.get("products")):
+        d = d[d["sku"].isin(as_list(p["products"]))]
+        scope.append(f"{len(as_list(p['products']))} selected SKU(s)")
     if as_list(p.get("pincodes")):
         d = d[d["pincode"].isin(as_list(p["pincodes"]))]
         scope.append("pincodes: " + ", ".join(as_list(p["pincodes"])))

@@ -6,6 +6,13 @@ NAME = "Search Visibility Tracker"
 DATASET = "serp"
 DESCRIPTION = ("How one product ranks in Amazon search across tracked keywords: organic vs sponsored rank, page-1 "
                "presence, rank trend over time and price/offer changes.")
+CHANNEL = "Amazon"
+SECTIONS = [
+    ("keyword_scorecard", "Keyword scorecard", "Per keyword: organic and sponsored rank, page-1 presence, paid share"),
+    ("rank_trend", "Organic rank trend", "Organic rank over time for the main keywords"),
+    ("paid_vs_organic", "Paid versus organic visibility", "Daily split of sponsored and organic appearances"),
+    ("price_offer", "Price and offer tracking", "Daily price, MRP, rating and rating count"),
+]
 KEYWORDS = ["keyword", "search", "serp", "rank", "ranking", "visibility", "organic", "sponsored", "seo", "ads",
             "position", "search results", "trend"]
 ENTITY_FIELD = "product"

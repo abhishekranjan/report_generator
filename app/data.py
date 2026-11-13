@@ -314,5 +314,32 @@ def date_span(df: pd.DataFrame) -> str:
     return f"{lo:%d %b} – {hi:%d %b %Y}"
 
 
+def date_bounds(df: pd.DataFrame):
+    """(min, max) crawl date as ISO strings, or (None, None)."""
+    if "crawl_date" not in df or df["crawl_date"].isna().all():
+        return None, None
+    return f"{df['crawl_date'].min():%Y-%m-%d}", f"{df['crawl_date'].max():%Y-%m-%d}"
+
+
+def filter_dates(df: pd.DataFrame, rng) -> tuple[pd.DataFrame, str]:
+    """Apply a {'preset': all|7|30|90|custom, 'from', 'to'} range. Returns (frame, description)."""
+    if not rng or rng.get("preset", "all") == "all" or "crawl_date" not in df:
+        return df, ""
+    today = pd.Timestamp.now().normalize()
+    if rng["preset"] == "custom":
+        lo = pd.to_datetime(rng.get("from"), errors="coerce")
+        hi = pd.to_datetime(rng.get("to"), errors="coerce")
+        lo = df["crawl_date"].min() if pd.isna(lo) else lo
+        hi = df["crawl_date"].max() if pd.isna(hi) else hi
+        label = f"{lo:%d %b %Y} – {hi:%d %b %Y}"
+    else:
+        days = int(rng["preset"])
+        lo, hi, label = today - pd.Timedelta(days=days - 1), today, f"last {days} days"
+    out = df[(df["crawl_date"] >= lo) & (df["crawl_date"] <= hi)]
+    if out.empty:
+        raise ValueError(f"There is no data for {label}. This dataset covers {date_span(df)} – widen the date range.")
+    return out, f"dates: {label}"
+
+
 def is_nan(v) -> bool:
     return v is None or (isinstance(v, float) and math.isnan(v))

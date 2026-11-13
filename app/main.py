@@ -12,14 +12,22 @@ app = FastAPI(title="Report Generator", docs_url=None, redoc_url=None)
 STATIC = Path(__file__).parent / "static"
 
 
-class PlanIn(BaseModel):
-    prompt: str = Field(min_length=3, max_length=2000)
+class Message(BaseModel):
+    role: str = Field(max_length=12)
+    text: str = Field(max_length=2000)
 
 
-class GenerateIn(BaseModel):
-    prompt: str = Field(default="", max_length=2000)
+class ChatIn(BaseModel):
+    messages: list[Message] = Field(max_length=40)
+    state: dict = {}
+
+
+class BuildIn(BaseModel):
+    prompt: str = Field(default="", max_length=6000)
     module: str = Field(max_length=60)
-    values: dict
+    values: dict = {}
+    design: dict = {}
+    unsupported: list[str] = Field(default=[], max_length=10)
 
 
 def _guard(fn, *a):
@@ -39,19 +47,34 @@ def overview():
     return service.overview()
 
 
-@app.post("/api/plan")
-def plan(body: PlanIn):
-    return _guard(service.make_plan, body.prompt)
+@app.post("/api/chat")
+def chat(body: ChatIn):
+    return _guard(service.chat, [m.model_dump() for m in body.messages], body.state)
 
 
 @app.get("/api/fields")
-def fields(module: str):
-    return _guard(service.fields, module)
+def fields(module: str, template: str | None = None):
+    return _guard(service.fields, module, template)
+
+
+@app.post("/api/preview")
+def preview(body: BuildIn):
+    return _guard(service.preview, body.module, body.values, body.design)
 
 
 @app.post("/api/generate")
-def generate(body: GenerateIn):
-    return _guard(service.generate, body.prompt, body.module, body.values)
+def generate(body: BuildIn):
+    return _guard(service.generate, body.prompt, body.module, body.values, body.design, body.unsupported)
+
+
+@app.get("/api/previews/{name}")
+def preview_image(name: str):
+    if not re.fullmatch(r"[0-9a-f]{20}_[1-3]\.png", name):
+        raise HTTPException(status_code=404)
+    path = service.PREVIEW_DIR / name
+    if not path.exists():
+        raise HTTPException(status_code=404)
+    return FileResponse(path, media_type="image/png")
 
 
 @app.get("/api/reports/{rid}")

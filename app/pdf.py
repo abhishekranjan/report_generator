@@ -162,12 +162,14 @@ def build_pdf(path, report: dict, narrative: dict, meta: dict) -> int:
     when = meta.get("generated") or datetime.now()
     title = narrative["title"]
     client = meta.get("client_name") or ""
+    pf = f"Prepared for {client}   ·   " if client else ""
     story = []
 
     if newsletter:
         story.append(_cover(st, accent, f"{config.COMPANY_NAME}  ·  Digital shelf briefing  ·  {when:%d %B %Y}",
                             narrative["headline"], title,
-                            [f"Prepared for {client}", f"{meta['module_name']}  ·  {report['subject']}  ·  data: {meta['dates']}"]))
+                            [f"Prepared for {client}" if client else "",
+                             f"{meta['module_name']}  ·  {report['subject']}  ·  data: {meta['dates']}"]))
         story.append(Spacer(1, 10))
         for para in narrative["summary"][:1]:
             story.append(Paragraph(tx(para), st["lead"]))
@@ -189,7 +191,7 @@ def build_pdf(path, report: dict, narrative: dict, meta: dict) -> int:
             story.append(KeepTogether([_callout(st, accent, "What to do next", _numbered(st, narrative["recommendations"][:4]))]))
     else:
         story.append(_cover(st, accent, f"{config.COMPANY_NAME}  ·  {meta['module_name']}", title, narrative["headline"],
-                            [f"Prepared for {client}   ·   {when:%d %B %Y}",
+                            [f"{pf}{when:%d %B %Y}",
                              f"Subject: {report['subject']}   ·   Data: {meta['dates']}"]))
         story.append(Spacer(1, 12))
         story.append(_kpis(st, report["kpis"]))
@@ -223,7 +225,10 @@ def build_pdf(path, report: dict, narrative: dict, meta: dict) -> int:
     notes = [Paragraph("ABOUT THIS BRIEFING", st["label"]) if newsletter else Paragraph("About this report", st["h2"]),
              Paragraph(tx(f"Source: {meta['source_label']}, crawled {meta['dates']}; {report['rows']:,} records in scope. "
                           f"Scope: {report['scope']}."), st["small"])]
+    if meta.get("unsupported"):
+        notes.append(Paragraph(tx("Not covered – not available in the crawl data: " + ", ".join(meta["unsupported"]) + "."), st["small"]))
     if not newsletter:
+        notes.append(Paragraph(tx(f"Report design: {meta.get('design_label', 'standard')}."), st["small"]))
         notes += [Paragraph(tx(d), st["small"], bulletText="•") for d in report["definitions"]]
         if meta.get("prompt"):
             notes.append(Paragraph(tx(f"Request: “{meta['prompt'][:400]}”"), st["small"]))
@@ -238,6 +243,14 @@ def build_pdf(path, report: dict, narrative: dict, meta: dict) -> int:
 
     def _page(canvas, doc):
         canvas.saveState()
+        if meta.get("preview"):  # layout previews are stamped so they are never mistaken for a deliverable
+            canvas.saveState()
+            canvas.setFont("Body-Bold", 64)
+            canvas.setFillColor(colors.HexColor("#000000"), alpha=0.07)
+            canvas.translate(W / 2, H / 2)
+            canvas.rotate(40)
+            canvas.drawCentredString(0, 0, "PREVIEW")
+            canvas.restoreState()
         canvas.setFont("Body", 7.5)
         canvas.setFillColor(colors.HexColor(MUTED))
         canvas.drawString(MARGIN, 10 * mm, tx_plain(footer))

@@ -7,131 +7,209 @@
 <style>
   :root {
     --bg: #f6f6f3; --card: #ffffff; --ink: #14140f; --ink2: #55544f; --muted: #8a8882; --line: #e2e1da;
-    --accent: #1c5cab; --accent-ink: #ffffff; --accent-soft: #e9f1fb; --warn-bg: #fff6e0; --warn-ink: #7a5300;
-    --err-bg: #fdecec; --err-ink: #a12626; --ok: #0b6e4f;
+    --accent: #1c5cab; --accent-ink: #ffffff; --accent-soft: #e9f1fb; --accent-deep: #173f73;
+    --ai-bg: #ebedf7; --ai-ink: #3f5fb8; --fl-bg: #ecf1ec; --fl-ink: #3c7a55;
+    --warn-bg: #fff6e0; --warn-ink: #7a5300; --err-bg: #fdecec; --err-ink: #a12626; --ok: #0b6e4f;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
-  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
-  h1 { font-size: 26px; line-height: 1.2; margin: 0; letter-spacing: -0.01em; }
-  h2 { font-size: 17px; margin: 0 0 4px; }
-  p.sub { color: var(--ink2); margin: 4px 0 20px; max-width: 62ch; }
+  main { max-width: 920px; margin: 0 auto; padding: 28px 16px 64px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; }
+  h1 { font-size: 22px; line-height: 1.2; margin: 0; letter-spacing: -0.01em; }
+  h2 { font-size: 20px; margin: 0 0 14px; letter-spacing: -0.01em; }
+  h3 { font-size: 16px; margin: 0 0 4px; }
+  [hidden] { display: none !important; }
+  .right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .pill { font-size: 12px; padding: 3px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
   .pill.off { background: var(--warn-bg); color: var(--warn-ink); }
+  .link { font: inherit; font-size: 13.5px; background: none; border: 0; color: var(--accent); cursor: pointer; padding: 2px 0; text-decoration: underline; text-underline-offset: 2px; }
   .steps { display: flex; gap: 8px; margin: 0 0 16px; padding: 0; list-style: none; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
   .steps li { display: flex; align-items: center; gap: 6px; }
   .steps li b { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); font-weight: 600; font-size: 12px; background: var(--card); }
   .steps li.on { color: var(--ink); } .steps li.on b { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
   .steps li.done b { background: var(--ok); color: #fff; border-color: var(--ok); }
   .steps li + li::before { content: ""; width: 22px; height: 1px; background: var(--line); margin-right: 2px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
-  [hidden] { display: none !important; }
-  textarea, input[type=text], input[type=number], select {
-    width: 100%; font: inherit; color: inherit; background: #fff; border: 1px solid #cfcec6; border-radius: 8px; padding: 9px 11px;
-  }
-  textarea { min-height: 110px; resize: vertical; }
-  textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
-  .chip { font: inherit; font-size: 13px; text-align: left; background: #fff; color: var(--ink2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; cursor: pointer; }
-  .chip:hover { border-color: var(--accent); color: var(--ink); }
-  .eyebrow { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 18px 0 0; }
-  .row { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
-  button.primary { font: inherit; font-weight: 600; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 10px 18px; cursor: pointer; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+  .card + .card { margin-top: 14px; }
+
+  /* landing */
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .mode { font: inherit; color: inherit; text-align: left; border: 1px solid transparent; border-radius: 16px; padding: 24px; cursor: pointer; display: flex; flex-direction: column; gap: 10px; }
+  .mode.ai { background: var(--ai-bg); } .mode.fl { background: var(--fl-bg); }
+  .mode:hover, .mode:focus-visible { border-color: currentColor; outline: none; }
+  .mode.ai:hover, .mode.ai:focus-visible { border-color: var(--ai-ink); } .mode.fl:hover, .mode.fl:focus-visible { border-color: var(--fl-ink); }
+  .mode svg { width: 38px; height: 38px; } .mode.ai svg { color: var(--ai-ink); } .mode.fl svg { color: var(--fl-ink); }
+  .mode strong { font-size: 21px; font-weight: 600; }
+  .mode span.d { color: var(--ink2); }
+  .badge { align-self: flex-start; font-size: 13px; font-weight: 600; padding: 3px 12px; border-radius: 99px; }
+  .mode.ai .badge { background: #d6e6d8; color: #2f7a43; } .mode.fl .badge { background: #dbe3f3; color: #3f6fd8; }
+  @media (max-width: 640px) { .modes, .grid, .tpls, .choice { grid-template-columns: 1fr !important; } }
+
+  /* inputs */
+  textarea, input[type=text], input[type=number], input[type=date], select {
+    width: 100%; font: inherit; color: inherit; background: #fff; border: 1px solid #cfcec6; border-radius: 8px; padding: 9px 11px; }
+  textarea:focus, input:focus, select:focus, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button.primary, a.primary { font: inherit; font-weight: 600; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 10px 18px; cursor: pointer; text-decoration: none; display: inline-block; }
   button.primary:disabled { opacity: .55; cursor: progress; }
-  button.ghost, a.ghost { font: inherit; background: transparent; color: var(--ink2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 14px; cursor: pointer; text-decoration: none; display: inline-block; }
-  a.primary { font-weight: 600; background: var(--accent); color: var(--accent-ink); border-radius: 8px; padding: 10px 18px; text-decoration: none; display: inline-block; }
+  button.ghost, a.ghost { font: inherit; background: #fff; color: var(--ink2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+  button.ghost:hover { border-color: var(--accent); color: var(--ink); }
+  .row { display: flex; gap: 10px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
   .note { font-size: 13px; color: var(--ink2); }
-  .banner { border-radius: 8px; padding: 10px 12px; font-size: 13.5px; margin: 0 0 14px; }
-  .banner.warn { background: var(--warn-bg); color: var(--warn-ink); }
-  .banner.err { background: var(--err-bg); color: var(--err-ink); }
-  .banner.info { background: var(--accent-soft); color: #173f73; }
-  .quote { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; color: var(--ink2); font-size: 14px; margin: 0 0 16px; }
-  fieldset { border: 0; padding: 0; margin: 0; }
-  legend { padding: 0; }
+  .banner { border-radius: 8px; padding: 10px 12px; font-size: 13.5px; margin: 0 0 12px; }
+  .banner.warn { background: var(--warn-bg); color: var(--warn-ink); } .banner.err { background: var(--err-bg); color: var(--err-ink); }
+  .banner.info { background: var(--accent-soft); color: var(--accent-deep); }
+  .eyebrow { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { font: inherit; font-size: 13px; text-align: left; background: #fff; color: var(--ink2); border: 1px solid var(--line); border-radius: 99px; padding: 6px 12px; cursor: pointer; }
+  .chip:hover, .chip.on { border-color: var(--accent); color: var(--accent-deep); background: var(--accent-soft); }
+
+  /* chat */
+  .chat { display: flex; flex-direction: column; gap: 10px; max-height: 52vh; overflow-y: auto; padding: 2px 2px 8px; }
+  .msg { max-width: 84%; padding: 10px 14px; border-radius: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .msg.assistant { align-self: flex-start; background: var(--ai-bg); border-bottom-left-radius: 4px; }
+  .msg.user { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+  .msg.typing { color: var(--ink2); font-style: italic; }
+  .composer { display: flex; gap: 8px; margin-top: 10px; align-items: flex-end; }
+  .composer textarea { min-height: 44px; height: 44px; max-height: 140px; resize: none; }
+  .flag { font-size: 12.5px; background: var(--warn-bg); color: var(--warn-ink); border-radius: 6px; padding: 6px 10px; align-self: flex-start; max-width: 84%; }
+  .sum { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 14px; margin: 0; }
+  .sum dt { color: var(--ink2); } .sum dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; } .sum dd.muted { font-weight: 400; color: var(--muted); }
+  .choice { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .opt { font: inherit; color: inherit; text-align: left; background: #fff; border: 1.5px solid var(--line); border-radius: 12px; padding: 14px 16px; cursor: pointer; }
+  .opt:hover { border-color: var(--accent); } .opt.on { border-color: var(--accent); background: var(--accent-soft); }
+  .opt strong { display: block; font-size: 15px; margin-bottom: 3px; } .opt span { font-size: 13.5px; color: var(--ink2); }
+  .tpls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .tpl { display: flex; flex-direction: column; justify-content: flex-start; }
+  .tpl ul { margin: 8px 0 0; padding-left: 18px; font-size: 13px; color: var(--ink2); }
+  .tpl .ch { font-size: 11.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .pv { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+  .pages { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+  .pages img { height: 330px; width: auto; border: 1px solid var(--line); border-radius: 6px; background: #fff; flex: none; }
+
+  /* form */
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; margin-top: 10px; }
   .grid .wide { grid-column: 1 / -1; }
-  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
   label.f { display: block; font-size: 13.5px; font-weight: 600; margin-bottom: 5px; }
   label.f .req { color: #b3261e; margin-left: 2px; }
   .help { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
-  .field.missing input, .field.missing select { border-color: #d9822b; background: #fffaf2; }
-  .field.missing .help { color: #9a5a12; }
-  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
-  .tags:empty { display: none; }
-  .tag { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: #173f73; border-radius: 6px; padding: 3px 4px 3px 8px; font-size: 13px; }
-  .tag button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 15px; line-height: 1; padding: 0 4px; border-radius: 4px; }
+  .field.missing input, .field.missing select { border-color: #d9822b; background: #fffaf2; } .field.missing .help { color: #9a5a12; }
+  .ro { background: #f3f3ef; border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; color: var(--ink2); }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; } .tags:empty { display: none; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: var(--accent-deep); border-radius: 6px; padding: 3px 4px 3px 8px; font-size: 13px; }
+  .tag button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 15px; line-height: 1; padding: 0 4px; }
+  .dr { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 8px; }
   input[type=color] { width: 46px; height: 38px; padding: 2px; border: 1px solid #cfcec6; border-radius: 8px; background: #fff; }
-  details { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 14px; }
-  summary { cursor: pointer; font-weight: 600; font-size: 14px; }
-  summary span { font-weight: 400; color: var(--muted); }
+  details { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 14px; }
+  summary { cursor: pointer; font-weight: 600; font-size: 14px; } summary span { font-weight: 400; color: var(--muted); }
+  .designrow { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; }
   .spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; display: inline-block; vertical-align: -3px; margin-right: 8px; animation: spin .7s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }
   iframe { width: 100%; height: 78vh; border: 1px solid var(--line); border-radius: 8px; margin-top: 16px; background: #fff; }
   .meta { color: var(--ink2); font-size: 14px; margin: 2px 0 0; }
-  ul.sources { margin: 8px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--ink2); display: grid; gap: 4px; }
-  ul.sources b { color: var(--ink); font-weight: 600; }
 </style>
 </head>
 <body>
 <main>
   <header>
     <h1>Report generator</h1>
-    <span id="llm" class="pill" hidden></span>
-  </header>
-  <p class="sub">Describe what you want to know. You'll confirm a few details, then get a PDF report or newsletter built from the latest crawl data.</p>
-
-  <ol class="steps" aria-label="Progress">
-    <li id="s1" class="on"><b>1</b> Describe</li>
-    <li id="s2"><b>2</b> Confirm details</li>
-    <li id="s3"><b>3</b> Your PDF</li>
-  </ol>
-
-  <!-- step 1 -->
-  <section id="step1" class="card">
-    <div id="err1" class="banner err" role="alert" hidden></div>
-    <label class="f" for="prompt">What should the report cover?</label>
-    <textarea id="prompt" maxlength="2000" placeholder="e.g. How is Britannia doing on Blinkit? Availability by pincode and the worst out-of-stock SKUs."></textarea>
-    <p class="eyebrow">Or start from an example</p>
-    <div id="examples" class="chips"></div>
-    <div class="row">
-      <button id="go" class="primary">Continue</button>
-      <span class="note">Nothing is generated yet – you'll review the details first.</span>
+    <div class="right">
+      <button id="restart" class="link" hidden>Start over</button>
+      <span id="llm" class="pill" hidden></span>
     </div>
-    <details>
-      <summary>What data is available? <span id="srcCount"></span></summary>
-      <ul id="sources" class="sources"></ul>
-    </details>
+  </header>
+  <div id="errTop" class="banner err" role="alert" hidden></div>
+
+  <!-- landing -->
+  <section id="vLanding">
+    <h2>How would you like to create your report?</h2>
+    <div class="modes">
+      <button class="mode ai" id="goAi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg>
+        <strong>Talk to AI</strong>
+        <span class="d">Describe your requirement. AI will ask questions, understand your needs and build the report.</span>
+        <span class="badge">Conversational</span>
+      </button>
+      <button class="mode fl" id="goFilter">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><path d="M15 4v4M9 10v4M17 16v4"/></svg>
+        <strong>Use Filters</strong>
+        <span class="d">Choose report type, brand, channel, date range and other parameters yourself.</span>
+        <span class="badge">Manual selection</span>
+      </button>
+    </div>
   </section>
 
-  <!-- step 2 -->
-  <section id="step2" class="card" hidden>
-    <div id="warn2" class="banner warn" hidden></div>
-    <div id="err2" class="banner err" role="alert" hidden></div>
-    <p class="quote" id="echo"></p>
-    <div id="need" class="banner info" hidden></div>
+  <ol class="steps" id="steps" aria-label="Progress" hidden>
+    <li id="s1"><b>1</b> <span></span></li><li id="s2"><b>2</b> <span></span></li><li id="s3"><b>3</b> <span>Your PDF</span></li>
+  </ol>
+
+  <!-- step 1 (AI): conversation + design choice -->
+  <section id="vChat" hidden>
+    <div class="card">
+      <div id="warnChat" class="banner warn" hidden></div>
+      <div id="chat" class="chat" aria-live="polite"></div>
+      <div id="sugg" class="chips" style="margin-top:8px"></div>
+      <form id="composer" class="composer">
+        <textarea id="msg" maxlength="2000" placeholder="Describe the report you need…" aria-label="Your message"></textarea>
+        <button class="primary" id="send" type="submit">Send</button>
+      </form>
+    </div>
+    <div class="card" id="understood" hidden>
+      <p class="eyebrow">What I understood</p>
+      <dl class="sum" id="sumChat"></dl>
+      <div id="unsupChat" class="banner warn" style="margin:12px 0 0" hidden></div>
+      <p class="note" style="margin:10px 0 0">Not right? Just tell me what to change in the chat above.</p>
+    </div>
+    <div class="card" id="designCard" hidden>
+      <h3>How should the report be designed?</h3>
+      <div class="choice">
+        <button class="opt" id="optAi" type="button"><strong>AI-designed custom report</strong><span>AI picks the sections, metrics, charts and order that best answer your request.</span></button>
+        <button class="opt" id="optTpl" type="button"><strong>Predefined template</strong><span>Pick one of our standard report formats and preview it first.</span></button>
+      </div>
+      <div id="tplListChat" class="tpls" hidden></div>
+      <div id="pvChat" class="pv" hidden></div>
+      <div class="row"><button class="primary" id="toConfirm" disabled>Continue to confirm details</button><span class="note" id="designNote">Choose a design to continue.</span></div>
+    </div>
+  </section>
+
+  <!-- step 1 (filters): choose a report type -->
+  <section id="vPick" hidden>
+    <div class="card">
+      <h3>Choose a report type</h3>
+      <p class="note" style="margin:0 0 10px">Channel</p>
+      <div id="channels" class="chips"></div>
+      <div id="tplListPick" class="tpls"></div>
+      <div id="pvPick" class="pv" hidden></div>
+      <div class="row"><button class="primary" id="toFilters" disabled>Continue to filters</button><span class="note">Select a report type to see a preview.</span></div>
+    </div>
+  </section>
+
+  <!-- step 2: confirm details / filters -->
+  <section id="vForm" class="card" hidden>
+    <div id="errForm" class="banner err" role="alert" hidden></div>
+    <div class="designrow"><span><span class="note">Report design</span><br><strong id="designLabel"></strong></span><button class="link" id="changeDesign" type="button">Change</button></div>
+    <div id="unsupForm" class="banner warn" hidden></div>
     <form id="form" novalidate>
-      <fieldset>
-        <legend><h2>Required</h2></legend>
-        <div class="grid" id="required"></div>
-      </fieldset>
-      <details id="optWrap">
-        <summary>Optional settings <span>– filters, title, tone, colour</span></summary>
-        <div class="grid" id="optional"></div>
-      </details>
+      <h3 id="formTitle"></h3>
+      <div class="grid" id="fReport"></div>
+      <h3 style="margin-top:20px">Filters</h3>
+      <p class="note" style="margin:0">Leave a filter empty to include everything.</p>
+      <div class="grid" id="fFilters"></div>
+      <details id="presWrap"><summary>Presentation <span>– prepared for, format, title, tone, colour</span></summary><div class="grid" id="fPres"></div></details>
+      <div id="pvForm" class="pv" hidden></div>
       <div class="row">
         <button id="gen" class="primary" type="submit">Generate PDF</button>
+        <button id="pvBtn" class="ghost" type="button">Preview layout</button>
         <button id="back" class="ghost" type="button">Back</button>
-        <span class="note" id="genNote"></span>
+        <span class="note">Generating takes about 20–40 seconds.</span>
       </div>
     </form>
   </section>
 
   <!-- step 3 -->
-  <section id="step3" class="card" hidden>
-    <div id="warn3" class="banner warn" hidden></div>
-    <h2 id="rTitle"></h2>
+  <section id="vResult" class="card" hidden>
+    <div id="warnRes" class="banner warn" hidden></div>
+    <h3 id="rTitle"></h3>
     <p class="meta" id="rHead"></p>
     <p class="meta" id="rMeta"></p>
     <div class="row">
@@ -146,8 +224,11 @@
 
 <script>
 const $ = id => document.getElementById(id);
-const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); kids.forEach(k => n.append(k)); return n; };
-const state = { prompt: "", module: null, modules: [], fields: [], values: {} };
+const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); kids.forEach(k => k != null && n.append(k)); return n; };
+const GREETING = "Hi! Tell me what you'd like a report on – a brand, a category, a product or a marketplace. I'll ask a few quick questions, then you choose how it should be designed.";
+let O = { modules: [], templates: [], channels: [], examples: [] };
+const fresh = () => ({ mode: null, messages: [], module: null, values: {}, unsupported: [], status: null, design: { mode: null, template: null }, fields: [], channel: "All" });
+let S = fresh();
 
 async function api(path, body) {
   const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
@@ -155,137 +236,230 @@ async function api(path, body) {
   if (!r.ok) throw new Error(typeof j.detail === "string" ? j.detail : "Something went wrong. Please try again.");
   return j;
 }
-function show(step) {
-  [1, 2, 3].forEach(i => { $("step" + i).hidden = i !== step; $("s" + i).className = i === step ? "on" : i < step ? "done" : ""; });
-  window.scrollTo({ top: 0 });
-}
 function banner(id, text) { $(id).textContent = text || ""; $(id).hidden = !text; }
 function busy(btn, on, label) { btn.disabled = on; btn.replaceChildren(...(on ? [el("span", { className: "spinner" }), label] : [label])); }
-
-// ---------- step 1
-async function init() {
-  try {
-    const o = await api("/api/overview");
-    state.modules = o.modules;
-    const pill = $("llm"); pill.hidden = false;
-    pill.textContent = o.gemini ? "Gemini connected · " + o.model : "Gemini key not set – using basic matching";
-    pill.classList.toggle("off", !o.gemini);
-    o.examples.forEach(t => $("examples").append(el("button", { className: "chip", type: "button", textContent: t, onclick: () => { $("prompt").value = t; $("prompt").focus(); } })));
-    $("srcCount").textContent = "(" + o.modules.length + " report types)";
-    o.modules.forEach(m => $("sources").append(el("li", {}, el("b", { textContent: m.name }), " – " + m.description + " (" + m.source + ", " + m.rows.toLocaleString() + " records, " + m.dates + ")")));
-    if (!o.modules.length) banner("err1", "No data has been imported yet. Ask your administrator to load the crawl files.");
-  } catch (e) { banner("err1", e.message); }
+const VIEWS = ["vLanding", "vChat", "vPick", "vForm", "vResult"];
+function show(view) {
+  VIEWS.forEach(v => $(v).hidden = v !== view);
+  const step = { vChat: 1, vPick: 1, vForm: 2, vResult: 3 }[view] || 0;
+  $("steps").hidden = !step; $("restart").hidden = !step;
+  if (step) {
+    $("s1").querySelector("span").textContent = S.mode === "ai" ? "Describe" : "Report type";
+    $("s2").querySelector("span").textContent = S.mode === "ai" ? "Confirm details" : "Filters";
+    [1, 2, 3].forEach(i => $("s" + i).className = i === step ? "on" : i < step ? "done" : "");
+  }
+  banner("errTop"); window.scrollTo({ top: 0 });
 }
-$("go").onclick = async () => {
-  const prompt = $("prompt").value.trim();
-  if (prompt.length < 3) { banner("err1", "Tell us what the report should cover."); $("prompt").focus(); return; }
-  banner("err1"); busy($("go"), true, "Reading your request…");
-  try {
-    const p = await api("/api/plan", { prompt });
-    Object.assign(state, { prompt, module: p.module, fields: p.fields, values: p.values });
-    const gaps = (p.unmatched || []).length ? "Not found in the data, so not applied: " + p.unmatched.join(", ") + ". The report will cover what is available – check the filters below." : "";
-    banner("warn2", [gaps, p.warning].filter(Boolean).join(" "));
-    renderForm(p.missing);
-    show(2);
-  } catch (e) { banner("err1", e.message); }
-  busy($("go"), false, "Continue");
-};
+const tpl = id => O.templates.find(t => t.id === id);
+const mod = id => O.modules.find(m => m.id === id);
+const designLabel = () => S.design.mode === "template" && tpl(S.design.template) ? "Predefined template: " + tpl(S.design.template).name : "AI-designed custom report";
+const userPrompt = () => S.messages.filter(m => m.role === "user").map(m => m.text).join("\n");
 
-// ---------- step 2
+// ---------------------------------------------------------------- shared: preview
+async function loadPreview(box, design) {
+  box.hidden = false;
+  box.replaceChildren(el("p", { className: "note" }, el("span", { className: "spinner" }), "Building a preview…"));
+  try {
+    const values = { ...S.values };
+    const p = await api("/api/preview", { module: S.module, values, design });
+    const note = (p.sample ? "Sample preview using " + p.subject + " – your report will use your own selection. " : "Preview for " + p.subject + ". ")
+      + (p.ai_note ? "With AI design the final sections, order and headings are chosen for your request, so this is indicative. " : "")
+      + "Commentary here is placeholder text; the final report's commentary is written by AI. " + p.total_pages + " pages in total.";
+    box.replaceChildren(
+      el("p", { className: "eyebrow", textContent: "Preview · " + p.design }),
+      el("div", { className: "pages" }, ...p.pages.map((u, i) => el("img", { src: u, alt: "Preview of page " + (i + 1), loading: "lazy" }))),
+      el("p", { className: "note", style: "margin:8px 0 0", textContent: note }),
+      el("p", { className: "note", style: "margin:4px 0 0", textContent: "Sections: " + p.sections.join(" · ") }));
+  } catch (e) { box.replaceChildren(el("div", { className: "banner err", textContent: "Preview unavailable: " + e.message })); }
+}
+function tplCard(t, selected, onPick) {
+  const b = el("button", { type: "button", className: "opt tpl" + (selected ? " on" : ""), onclick: () => onPick(t) },
+    el("span", { className: "ch", textContent: t.channel + " · data " + t.dates }), el("strong", { textContent: t.name }), el("span", { textContent: t.description }));
+  b.append(el("ul", {}, ...t.sections.map(s => el("li", { textContent: s }))));
+  return b;
+}
+
+// ---------------------------------------------------------------- AI mode: conversation
+function addMsg(role, text, cls = "") { const n = el("div", { className: "msg " + role + " " + cls, textContent: text }); $("chat").append(n); $("chat").scrollTop = $("chat").scrollHeight; return n; }
+function setSuggestions(list) { $("sugg").replaceChildren(...list.map(t => el("button", { className: "chip", type: "button", textContent: t, onclick: () => send(t) }))); }
+function startChat() {
+  S = { ...fresh(), mode: "ai" };
+  $("chat").replaceChildren(); addMsg("assistant", GREETING); setSuggestions(O.examples);
+  ["understood", "designCard"].forEach(i => $(i).hidden = true); banner("warnChat");
+  show("vChat"); $("msg").focus();
+}
+async function send(text) {
+  text = (text || $("msg").value).trim();
+  if (!text || $("send").disabled) return;
+  $("msg").value = ""; setSuggestions([]);
+  S.messages.push({ role: "user", text }); addMsg("user", text);
+  const typing = addMsg("assistant", "Thinking…", "typing"); $("send").disabled = true;
+  try {
+    const r = await api("/api/chat", { messages: S.messages, state: { module: S.module, values: S.values, unsupported: S.unsupported } });
+    typing.remove();
+    const changed = r.module !== S.module;
+    Object.assign(S, { module: r.module, values: r.values, unsupported: r.unsupported, status: r.status });
+    S.messages.push({ role: "assistant", text: r.reply }); addMsg("assistant", r.reply);
+    if (r.unmatched.length) $("chat").append(el("div", { className: "flag", textContent: "Not in the data: " + r.unmatched.join(", ") }));
+    setSuggestions(r.suggestions); banner("warnChat", r.warning);
+    renderUnderstood(r.summary, r.templates, changed);
+  } catch (e) { typing.remove(); addMsg("assistant", "Sorry – " + e.message); S.messages.pop(); }
+  $("send").disabled = false; $("msg").focus(); $("chat").scrollTop = $("chat").scrollHeight;
+}
+function renderUnderstood(summary, templates, moduleChanged) {
+  $("understood").hidden = !S.module || S.status === "out_of_scope";
+  $("sumChat").replaceChildren(...summary.flatMap(r => [el("dt", { textContent: r.label }), el("dd", { textContent: r.value, className: r.muted ? "muted" : "" })]));
+  banner("unsupChat", S.unsupported.length ? "Not available in the data, so it will not be in the report: " + S.unsupported.join(", ") + "." : "");
+  const ready = S.status === "ready";
+  $("designCard").hidden = !ready;
+  if (!ready) return;
+  if (moduleChanged || (S.design.template && !templates.includes(S.design.template))) S.design = { mode: null, template: null };
+  S.tplIds = templates; renderDesign();
+  $("designCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+function renderDesign() {
+  const d = S.design;
+  $("optAi").classList.toggle("on", d.mode === "ai"); $("optTpl").classList.toggle("on", d.mode === "template");
+  const list = $("tplListChat"); list.hidden = d.mode !== "template";
+  if (d.mode === "template") list.replaceChildren(...O.templates.filter(t => S.tplIds.includes(t.id)).map(t => tplCard(t, d.template === t.id, t => { S.design = { mode: "template", template: t.id }; renderDesign(); loadPreview($("pvChat"), S.design); })));
+  const ok = d.mode === "ai" || (d.mode === "template" && d.template);
+  $("toConfirm").disabled = !ok;
+  $("designNote").textContent = ok ? designLabel() : d.mode === "template" ? "Pick a template to preview it." : "Choose a design to continue.";
+  if (!ok) $("pvChat").hidden = true;
+}
+$("optAi").onclick = () => { S.design = { mode: "ai", template: null }; renderDesign(); loadPreview($("pvChat"), S.design); };
+$("optTpl").onclick = () => { S.design = { mode: "template", template: S.tplIds.length === 1 ? S.tplIds[0] : null }; renderDesign(); if (S.design.template) loadPreview($("pvChat"), S.design); };
+$("composer").onsubmit = e => { e.preventDefault(); send(); };
+$("msg").onkeydown = e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } };
+$("toConfirm").onclick = () => openForm();
+
+// ---------------------------------------------------------------- filter mode: pick a report type
+function startFilters() { S = { ...fresh(), mode: "filter" }; renderPick(); show("vPick"); }
+function renderPick() {
+  $("channels").replaceChildren(...["All", ...O.channels].map(c => el("button", { type: "button", className: "chip" + (S.channel === c ? " on" : ""), textContent: c === "All" ? "All channels" : c, onclick: () => { S.channel = c; renderPick(); } })));
+  const list = O.templates.filter(t => S.channel === "All" || t.channel === S.channel);
+  if (S.design.template && !list.some(t => t.id === S.design.template)) { S.design = { mode: null, template: null }; S.module = null; $("pvPick").hidden = true; }
+  $("tplListPick").replaceChildren(...list.map(t => tplCard(t, S.design.template === t.id, t => {
+    if (S.module !== t.module) S.values = {};
+    S.module = t.module; S.design = { mode: "template", template: t.id }; renderPick(); loadPreview($("pvPick"), S.design);
+  })));
+  $("toFilters").disabled = !S.design.template;
+}
+$("toFilters").onclick = () => openForm();
+
+// ---------------------------------------------------------------- step 2: form
+async function openForm() {
+  try {
+    const r = await api("/api/fields?module=" + encodeURIComponent(S.module) + (S.design.template ? "&template=" + encodeURIComponent(S.design.template) : ""));
+    S.fields = r.fields; S.values = { ...r.values, ...S.values };
+    const allowed = new Set((S.fields.find(f => f.key === "sections")?.options || []).map(o => o.value));
+    if (S.values.sections) { S.values.sections = S.values.sections.filter(v => allowed.has(v)); if (!S.values.sections.length) delete S.values.sections; }
+    $("pvForm").hidden = true; banner("errForm"); renderForm([]); show("vForm");
+  } catch (e) { banner("errTop", e.message); }
+}
 function optionsFor(f) {
   let o = f.options || [];
-  if (f.depends_on) { const parent = state.values[f.depends_on]; o = o.filter(x => x.parent === undefined || x.parent === parent); }
+  if (f.depends_on) { const parent = S.values[f.depends_on]; o = o.filter(x => x.parent === undefined || x.parent === parent); }
   const seen = new Set(); return o.filter(x => !seen.has(x.value) && seen.add(x.value));
 }
 function control(f) {
-  const id = "f_" + f.key, v = state.values[f.key];
+  const id = "f_" + f.key, v = S.values[f.key];
   if (f.type === "select") {
     const s = el("select", { id });
-    if (!f.required || v === undefined || v === "") s.append(el("option", { value: "", textContent: f.required ? "Choose…" : "— none —" }));
+    if (!f.required || v === undefined || v === "") s.append(el("option", { value: "", textContent: f.required ? "Choose…" : "All" }));
     optionsFor(f).forEach(o => s.append(el("option", { value: o.value, textContent: o.label })));
     s.value = v ?? "";
-    s.onchange = () => { state.values[f.key] = s.value || undefined; onChange(f); };
+    s.onchange = () => { if (s.value) S.values[f.key] = s.value; else delete S.values[f.key]; onChange(f); };
     return s;
   }
   if (f.type === "multi") {
-    const wrap = el("div"), tags = el("div", { className: "tags" }), s = el("select", { id });
+    const wrap = el("div"), tags = el("div", { className: "tags" });
+    const opts = optionsFor(f), big = opts.length > 12;
+    const pick = big ? el("input", { id, type: "text", placeholder: "Type to search, then pick…", autocomplete: "off" }) : el("select", { id });
+    const dl = big ? el("datalist", { id: id + "_dl" }) : null;
+    if (big) pick.setAttribute("list", id + "_dl");
+    const add = val => { S.values[f.key] = [...(S.values[f.key] || []), val]; draw(); };
     const draw = () => {
-      const cur = state.values[f.key] || [], opts = optionsFor(f);
+      const cur = S.values[f.key] || [], rest = opts.filter(o => !cur.includes(o.value));
       tags.replaceChildren(...cur.map(val => el("span", { className: "tag" }, (opts.find(o => o.value === val) || {}).label || val,
-        el("button", { type: "button", ariaLabel: "Remove " + val, textContent: "×", onclick: () => { state.values[f.key] = cur.filter(x => x !== val); draw(); } }))));
-      s.replaceChildren(el("option", { value: "", textContent: cur.length ? "Add another…" : "All (no filter) – add one…" }),
-        ...opts.filter(o => !cur.includes(o.value)).map(o => el("option", { value: o.value, textContent: o.label })));
+        el("button", { type: "button", ariaLabel: "Remove " + val, textContent: "×", onclick: () => { const n = cur.filter(x => x !== val); if (n.length) S.values[f.key] = n; else delete S.values[f.key]; draw(); } }))));
+      if (big) { dl.replaceChildren(...rest.map(o => el("option", { value: o.label }))); pick.value = ""; }
+      else pick.replaceChildren(el("option", { value: "", textContent: cur.length ? "Add another…" : "All – add one to narrow…" }), ...rest.map(o => el("option", { value: o.value, textContent: o.label })));
     };
-    s.onchange = () => { if (s.value) { state.values[f.key] = [...(state.values[f.key] || []), s.value]; draw(); } };
-    draw(); wrap.append(tags, s); return wrap;
+    if (big) pick.oninput = () => { const o = opts.find(o => o.label === pick.value); if (o) add(o.value); };
+    else pick.onchange = () => { if (pick.value) add(pick.value); };
+    draw(); wrap.append(tags, pick); if (dl) wrap.append(dl); return wrap;
+  }
+  if (f.type === "daterange") {
+    const cur = v || { preset: "all" };
+    const s = el("select", { id }), from = el("input", { type: "date", ariaLabel: "From date", value: cur.from || f.min || "" }), to = el("input", { type: "date", ariaLabel: "To date", value: cur.to || f.max || "" });
+    [["all", "All available data"], ["7", "Last 7 days"], ["30", "Last 30 days"], ["90", "Last 90 days"], ["custom", "Custom range"]].forEach(([val, t]) => s.append(el("option", { value: val, textContent: t })));
+    s.value = cur.preset;
+    const sync = () => { from.hidden = to.hidden = s.value !== "custom"; if (s.value === "all") delete S.values[f.key]; else S.values[f.key] = { preset: s.value, from: from.value || null, to: to.value || null }; };
+    s.onchange = from.onchange = to.onchange = sync; sync();
+    return el("div", { className: "dr" }, s, from, to);
   }
   const i = el("input", { id, type: f.type === "number" ? "number" : f.type === "color" ? "color" : "text", value: v ?? "" });
   if (f.type === "number") { i.min = 3; i.max = 25; }
   if (f.type === "text") i.maxLength = 120;
-  i.oninput = () => { state.values[f.key] = i.value; i.closest(".field").classList.remove("missing"); };
+  i.oninput = () => { if (i.value) S.values[f.key] = i.value; else delete S.values[f.key]; };
   return i;
 }
 function fieldNode(f, missing) {
-  const n = el("div", { className: "field" + (missing ? " missing" : "") + (f.type === "multi" || f.key === "title" ? " wide" : "") });
+  const n = el("div", { className: "field" + (missing ? " missing" : "") + (["multi", "daterange"].includes(f.type) || f.key === "title" ? " wide" : "") });
   const lab = el("label", { className: "f", htmlFor: "f_" + f.key, textContent: f.label });
   if (f.required) lab.append(el("span", { className: "req", textContent: "*", title: "Required" }));
-  n.append(lab, control(f), el("div", { className: "help", textContent: (missing ? "Needed – we couldn't find this in your request. " : "") + (f.help || "") }));
+  n.append(lab, control(f), el("div", { className: "help", textContent: (missing ? "Needed to build this report. " : "") + (f.help || "") }));
   return n;
 }
-function renderForm(missing = []) {
-  $("echo").textContent = "“" + state.prompt + "”";
-  const typeField = { key: "__module", label: "Report type", type: "select", required: true, help: (state.modules.find(m => m.id === state.module) || {}).description || "Pick the kind of report you need.",
-    options: state.modules.map(m => ({ value: m.id, label: m.name })) };
-  state.values.__module = state.module || undefined;
-  const req = [typeField, ...state.fields.filter(f => f.required)], opt = state.fields.filter(f => !f.required);
-  $("required").replaceChildren(...req.map(f => fieldNode(f, missing.includes(f.key) || (f.key === "__module" && !state.module))));
-  $("optional").replaceChildren(...opt.map(f => fieldNode(f, false)));
-  $("optWrap").hidden = !opt.length;
-  // show the optional block when we picked something up from the request, so nothing is applied unseen
-  const common = ["title", "tone", "top_n", "accent"];
-  if (opt.some(f => !common.includes(f.key) && state.values[f.key] !== undefined && String(state.values[f.key]) !== "") || state.values.title) $("optWrap").open = true;
-  const names = req.filter(f => missing.includes(f.key) || (f.key === "__module" && !state.module)).map(f => f.label);
-  banner("need", names.length ? "We need " + names.length + " more detail" + (names.length > 1 ? "s" : "") + " before generating: " + names.join(", ") + "." : "");
-  $("genNote").textContent = "Takes about 10–30 seconds.";
+const PRES = ["client_name", "format", "title", "tone", "top_n", "accent"];
+function renderForm(missing) {
+  const m = mod(S.module);
+  $("designLabel").textContent = designLabel();
+  $("formTitle").textContent = S.mode === "ai" ? "Review what will go into the report" : "Set your filters";
+  banner("unsupForm", S.unsupported.length ? "Requested but not available in the data – these will not be in the report: " + S.unsupported.join(", ") + "." : "");
+  const ro = (label, value) => el("div", { className: "field" }, el("label", { className: "f", textContent: label }), el("div", { className: "ro", textContent: value }));
+  const req = S.fields.filter(f => f.required), pres = S.fields.filter(f => PRES.includes(f.key)), filt = S.fields.filter(f => !f.required && !PRES.includes(f.key));
+  $("fReport").replaceChildren(ro("Report type", m.name), ro("Channel · data coverage", m.channel + " · " + m.dates), ...req.map(f => fieldNode(f, missing.includes(f.key))));
+  $("fFilters").replaceChildren(...filt.map(f => fieldNode(f, false)));
+  $("fPres").replaceChildren(...pres.map(f => fieldNode(f, false)));
 }
-async function onChange(f) {
-  if (f.key === "__module") {
-    const keep = {}; ["client_name", "format", "title", "tone", "top_n", "accent"].forEach(k => { if (state.values[k] !== undefined) keep[k] = state.values[k]; });
-    try {
-      const r = await api("/api/fields?module=" + encodeURIComponent(state.values.__module));
-      Object.assign(state, { module: state.values.__module, fields: r.fields, values: { ...r.values, ...keep } });
-      renderForm([]);
-    } catch (e) { banner("err2", e.message); }
-    return;
-  }
-  const kids = state.fields.filter(x => x.depends_on === f.key);
-  if (kids.length) { kids.forEach(k => delete state.values[k.key]); renderForm([]); }
-  else document.getElementById("f_" + f.key)?.closest(".field")?.classList.remove("missing");
+function onChange(f) {
+  const kids = S.fields.filter(x => x.depends_on === f.key);
+  if (kids.length) { kids.forEach(k => delete S.values[k.key]); renderForm([]); }
+  else $("f_" + f.key)?.closest(".field")?.classList.remove("missing");
 }
+function missingRequired() { return S.fields.filter(f => f.required && (S.values[f.key] === undefined || S.values[f.key] === "")); }
+$("pvBtn").onclick = () => { loadPreview($("pvForm"), S.design); $("pvForm").scrollIntoView({ behavior: "smooth", block: "nearest" }); };
+$("changeDesign").onclick = $("back").onclick = () => show(S.mode === "ai" ? "vChat" : "vPick");
 $("form").onsubmit = async e => {
-  e.preventDefault(); banner("err2");
-  const req = state.fields.filter(f => f.required);
-  const miss = req.filter(f => { const v = state.values[f.key]; return v === undefined || v === "" || (typeof v === "string" && !v.trim()); });
-  if (!state.module || miss.length) {
-    renderForm(miss.map(f => f.key));
-    const first = !state.module ? "f___module" : "f_" + miss[0].key; $(first)?.focus(); return;
-  }
-  const values = { ...state.values }; delete values.__module;
-  busy($("gen"), true, "Building your report…"); $("back").disabled = true;
+  e.preventDefault(); banner("errForm");
+  const miss = missingRequired();
+  if (miss.length) { renderForm(miss.map(f => f.key)); banner("errForm", "Please fill in: " + miss.map(f => f.label).join(", ") + "."); $("f_" + miss[0].key)?.focus(); return; }
+  busy($("gen"), true, "Building your report…");
   try {
-    const r = await api("/api/generate", { prompt: state.prompt, module: state.module, values });
+    const r = await api("/api/generate", { prompt: userPrompt(), module: S.module, values: S.values, design: S.design, unsupported: S.unsupported });
     $("rTitle").textContent = r.title; $("rHead").textContent = r.headline;
-    $("rMeta").textContent = r.pages + " page" + (r.pages > 1 ? "s" : "") + " · " + r.filename + " · commentary: " + (r.narrative_source === "gemini" ? "written by " + (r.model || "Gemini") : "standard template");
-    banner("warn3", r.warning);
-    $("dl").href = r.url + "?download=1"; $("open").href = r.url;$("viewer").src = r.url + "#view=FitH";
-    show(3);
-  } catch (err) { banner("err2", err.message); }
-  busy($("gen"), false, "Generate PDF"); $("back").disabled = false;
+    $("rMeta").textContent = r.pages + " page" + (r.pages > 1 ? "s" : "") + " · " + r.design + " · commentary: " + (r.narrative_source === "gemini" ? "written by " + (r.model || "Gemini") : "standard template") + " · sections: " + r.sections.join(", ");
+    banner("warnRes", r.warning);
+    $("dl").href = r.url + "?download=1"; $("open").href = r.url; $("viewer").src = r.url + "#view=FitH";
+    show("vResult");
+  } catch (err) { banner("errForm", err.message); $("errForm").scrollIntoView({ block: "nearest" }); }
+  busy($("gen"), false, "Generate PDF");
 };
-$("back").onclick = () => show(1);
-$("tweak").onclick = () => show(2);
-$("again").onclick = () => { $("prompt").value = ""; $("viewer").src = "about:blank"; show(1); $("prompt").focus(); };
-init();
+$("tweak").onclick = () => show("vForm");
+$("again").onclick = $("restart").onclick = () => { $("viewer").src = "about:blank"; S = fresh(); show("vLanding"); };
+$("goAi").onclick = startChat; $("goFilter").onclick = startFilters;
+
+(async function init() {
+  try {
+    O = await api("/api/overview");
+    const pill = $("llm"); pill.hidden = false;
+    pill.textContent = O.gemini ? "AI connected" : "AI key not set – basic matching";
+    pill.classList.toggle("off", !O.gemini);
+    if (!O.modules.length) banner("errTop", "No data has been imported yet. Ask your administrator to load the crawl files.");
+  } catch (e) { banner("errTop", e.message); }
+})();
 </script>
 </body>
 </html>

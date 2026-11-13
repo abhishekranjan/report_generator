@@ -6,6 +6,13 @@ NAME = "Store-Level Availability"
 DATASET = "product_details"
 DESCRIPTION = ("Where a single product is actually buyable: in-stock rate across every dark store checked, "
                "city coverage, the stores that have it, price points seen and sellers.")
+CHANNEL = "Blinkit"
+SECTIONS = [
+    ("city_coverage", "Coverage by city", "Stores checked and in stock per city"),
+    ("in_stock_stores", "Stores with stock", "The individual stores where the product is buyable"),
+    ("price_points", "Price points seen", "Selling prices and discounts across stores"),
+    ("sellers", "Sellers", "Seller entities behind the listings"),
+]
 KEYWORDS = ["store", "dark store", "store level", "where", "buyable", "single product", "sku availability",
             "stock-out", "stockout", "coverage", "distribution", "merchant", "seller"]
 ENTITY_FIELD = "product"

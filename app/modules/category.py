@@ -9,6 +9,15 @@ NAME = "Category Landscape"
 DATASET = "category"
 DESCRIPTION = ("Competitive view of one Blinkit category: brand share of shelf, sponsored placements, price "
                "architecture, availability by city and the most visible products. Optionally benchmarks one brand.")
+CHANNEL = "Blinkit"
+SECTIONS = [
+    ("share_of_shelf", "Share of shelf", "Brand share of listings and of first-page listings"),
+    ("sponsored", "Sponsored placements", "Which brands buy ad slots and how much they rely on them"),
+    ("pricing", "Price architecture", "Price bands, median price, most discounted products"),
+    ("city_availability", "Availability by city", "In-stock rate per city, weakest first"),
+    ("top_products", "Most visible products", "Products most often on the first page"),
+    ("focus_brand", "Focus brand versus the category", "Scorecard of one brand against category averages (needs a focus brand)"),
+]
 KEYWORDS = ["category", "competition", "competitor", "share of shelf", "market", "landscape", "sponsored", "ads",
             "price band", "benchmark", "city", "blinkit", "players"]
 ENTITY_FIELD = "category"
@@ -22,6 +31,8 @@ def fields(df):
         field("category", "Category", "select", True, opts(cats), "The Blinkit category to analyse."),
         field("focus_brand", "Focus brand", "select", False, opts(b["brand"], parents=b["category"]),
               "Optional – benchmark this brand against the category.", "category"),
+        field("competitors", "Competitors", "multi", False, opts(b["brand"], parents=b["category"]),
+              "Brands to compare in the share-of-shelf view. Leave empty for the top brands.", "category"),
         field("cities", "Cities", "multi", False, opts(c["city"], parents=c["category"]),
               "Leave empty for every city crawled.", "category"),
     ]
@@ -85,6 +96,12 @@ def build(df, p):
                      f"and {pct(g.loc[focus, 'p1_share'], 1)} of first-page listings.")
         if focus not in top.index:
             top = pd.concat([top.iloc[:-1], g.loc[[focus]]])
+    comp = [c for c in as_list(p.get("competitors")) if c in g.index]
+    if comp:
+        chosen = list(dict.fromkeys(([focus] if focus else []) + comp))
+        top = g.loc[chosen].sort_values("share", ascending=False)
+        scope.append("compared brands: " + ", ".join(chosen))
+        facts.append(f"The selected brands ({join_names(chosen, 6)}) together hold {pct(top['share'].sum(), 1)} of all listings.")
     ch = chart("barh", "Share of shelf by brand (% of listings)", top.index, top["share"], "pct1", highlight=focus)
     tb = table(["Brand", "Share", "Page-1 share", "Products", "Median price", "Discount", "In stock", "Rating"],
                [[trunc(b, 26), pct(r.share, 1), pct(r.p1_share, 1), cnt(r.products), money(r.price), pct(r.disc),
