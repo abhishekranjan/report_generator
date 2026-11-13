@@ -1,0 +1,19 @@
+# secrets – never commit
+.env
+.env.*
+!.env.example
+
+# client crawl data and generated reports
+data/
+output/
+
+# python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# editor / tooling
+.claude/
+.vscode/
+.idea/

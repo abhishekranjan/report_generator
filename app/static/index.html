@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report Generator</title>
+<style>
+  :root {
+    --bg: #f6f6f3; --card: #ffffff; --ink: #14140f; --ink2: #55544f; --muted: #8a8882; --line: #e2e1da;
+    --accent: #1c5cab; --accent-ink: #ffffff; --accent-soft: #e9f1fb; --warn-bg: #fff6e0; --warn-ink: #7a5300;
+    --err-bg: #fdecec; --err-ink: #a12626; --ok: #0b6e4f;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  h1 { font-size: 26px; line-height: 1.2; margin: 0; letter-spacing: -0.01em; }
+  h2 { font-size: 17px; margin: 0 0 4px; }
+  p.sub { color: var(--ink2); margin: 4px 0 20px; max-width: 62ch; }
+  .pill { font-size: 12px; padding: 3px 10px; border-radius: 99px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+  .pill.off { background: var(--warn-bg); color: var(--warn-ink); }
+  .steps { display: flex; gap: 8px; margin: 0 0 16px; padding: 0; list-style: none; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+  .steps li { display: flex; align-items: center; gap: 6px; }
+  .steps li b { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line); font-weight: 600; font-size: 12px; background: var(--card); }
+  .steps li.on { color: var(--ink); } .steps li.on b { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .steps li.done b { background: var(--ok); color: #fff; border-color: var(--ok); }
+  .steps li + li::before { content: ""; width: 22px; height: 1px; background: var(--line); margin-right: 2px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; }
+  [hidden] { display: none !important; }
+  textarea, input[type=text], input[type=number], select {
+    width: 100%; font: inherit; color: inherit; background: #fff; border: 1px solid #cfcec6; border-radius: 8px; padding: 9px 11px;
+  }
+  textarea { min-height: 110px; resize: vertical; }
+  textarea:focus, input:focus, select:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 0; }
+  .chip { font: inherit; font-size: 13px; text-align: left; background: #fff; color: var(--ink2); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+  .chip:hover { border-color: var(--accent); color: var(--ink); }
+  .eyebrow { font-size: 11.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 18px 0 0; }
+  .row { display: flex; gap: 10px; align-items: center; margin-top: 18px; flex-wrap: wrap; }
+  button.primary { font: inherit; font-weight: 600; background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 10px 18px; cursor: pointer; }
+  button.primary:disabled { opacity: .55; cursor: progress; }
+  button.ghost, a.ghost { font: inherit; background: transparent; color: var(--ink2); border: 1px solid var(--line); border-radius: 8px; padding: 9px 14px; cursor: pointer; text-decoration: none; display: inline-block; }
+  a.primary { font-weight: 600; background: var(--accent); color: var(--accent-ink); border-radius: 8px; padding: 10px 18px; text-decoration: none; display: inline-block; }
+  .note { font-size: 13px; color: var(--ink2); }
+  .banner { border-radius: 8px; padding: 10px 12px; font-size: 13.5px; margin: 0 0 14px; }
+  .banner.warn { background: var(--warn-bg); color: var(--warn-ink); }
+  .banner.err { background: var(--err-bg); color: var(--err-ink); }
+  .banner.info { background: var(--accent-soft); color: #173f73; }
+  .quote { border-left: 3px solid var(--line); padding: 2px 0 2px 12px; color: var(--ink2); font-size: 14px; margin: 0 0 16px; }
+  fieldset { border: 0; padding: 0; margin: 0; }
+  legend { padding: 0; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; margin-top: 10px; }
+  .grid .wide { grid-column: 1 / -1; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  label.f { display: block; font-size: 13.5px; font-weight: 600; margin-bottom: 5px; }
+  label.f .req { color: #b3261e; margin-left: 2px; }
+  .help { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .field.missing input, .field.missing select { border-color: #d9822b; background: #fffaf2; }
+  .field.missing .help { color: #9a5a12; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+  .tags:empty { display: none; }
+  .tag { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: #173f73; border-radius: 6px; padding: 3px 4px 3px 8px; font-size: 13px; }
+  .tag button { border: 0; background: transparent; color: inherit; cursor: pointer; font-size: 15px; line-height: 1; padding: 0 4px; border-radius: 4px; }
+  input[type=color] { width: 46px; height: 38px; padding: 2px; border: 1px solid #cfcec6; border-radius: 8px; background: #fff; }
+  details { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 14px; }
+  summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+  summary span { font-weight: 400; color: var(--muted); }
+  .spinner { width: 16px; height: 16px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; display: inline-block; vertical-align: -3px; margin-right: 8px; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2s; } }
+  iframe { width: 100%; height: 78vh; border: 1px solid var(--line); border-radius: 8px; margin-top: 16px; background: #fff; }
+  .meta { color: var(--ink2); font-size: 14px; margin: 2px 0 0; }
+  ul.sources { margin: 8px 0 0; padding: 0; list-style: none; font-size: 13px; color: var(--ink2); display: grid; gap: 4px; }
+  ul.sources b { color: var(--ink); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Report generator</h1>
+    <span id="llm" class="pill" hidden></span>
+  </header>
+  <p class="sub">Describe what you want to know. You'll confirm a few details, then get a PDF report or newsletter built from the latest crawl data.</p>
+
+  <ol class="steps" aria-label="Progress">
+    <li id="s1" class="on"><b>1</b> Describe</li>
+    <li id="s2"><b>2</b> Confirm details</li>
+    <li id="s3"><b>3</b> Your PDF</li>
+  </ol>
+
+  <!-- step 1 -->
+  <section id="step1" class="card">
+    <div id="err1" class="banner err" role="alert" hidden></div>
+    <label class="f" for="prompt">What should the report cover?</label>
+    <textarea id="prompt" maxlength="2000" placeholder="e.g. How is Britannia doing on Blinkit? Availability by pincode and the worst out-of-stock SKUs."></textarea>
+    <p class="eyebrow">Or start from an example</p>
+    <div id="examples" class="chips"></div>
+    <div class="row">
+      <button id="go" class="primary">Continue</button>
+      <span class="note">Nothing is generated yet – you'll review the details first.</span>
+    </div>
+    <details>
+      <summary>What data is available? <span id="srcCount"></span></summary>
+      <ul id="sources" class="sources"></ul>
+    </details>
+  </section>
+
+  <!-- step 2 -->
+  <section id="step2" class="card" hidden>
+    <div id="warn2" class="banner warn" hidden></div>
+    <div id="err2" class="banner err" role="alert" hidden></div>
+    <p class="quote" id="echo"></p>
+    <div id="need" class="banner info" hidden></div>
+    <form id="form" novalidate>
+      <fieldset>
+        <legend><h2>Required</h2></legend>
+        <div class="grid" id="required"></div>
+      </fieldset>
+      <details id="optWrap">
+        <summary>Optional settings <span>– filters, title, tone, colour</span></summary>
+        <div class="grid" id="optional"></div>
+      </details>
+      <div class="row">
+        <button id="gen" class="primary" type="submit">Generate PDF</button>
+        <button id="back" class="ghost" type="button">Back</button>
+        <span class="note" id="genNote"></span>
+      </div>
+    </form>
+  </section>
+
+  <!-- step 3 -->
+  <section id="step3" class="card" hidden>
+    <div id="warn3" class="banner warn" hidden></div>
+    <h2 id="rTitle"></h2>
+    <p class="meta" id="rHead"></p>
+    <p class="meta" id="rMeta"></p>
+    <div class="row">
+      <a id="dl" class="primary" href="#">Download PDF</a>
+      <a id="open" class="ghost" href="#" target="_blank" rel="noopener">Open in new tab</a>
+      <button id="tweak" class="ghost" type="button">Change details</button>
+      <button id="again" class="ghost" type="button">New report</button>
+    </div>
+    <iframe id="viewer" title="Report preview"></iframe>
+  </section>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const el = (tag, props = {}, ...kids) => { const n = Object.assign(document.createElement(tag), props); kids.forEach(k => n.append(k)); return n; };
+const state = { prompt: "", module: null, modules: [], fields: [], values: {} };
+
+async function api(path, body) {
+  const r = await fetch(path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(typeof j.detail === "string" ? j.detail : "Something went wrong. Please try again.");
+  return j;
+}
+function show(step) {
+  [1, 2, 3].forEach(i => { $("step" + i).hidden = i !== step; $("s" + i).className = i === step ? "on" : i < step ? "done" : ""; });
+  window.scrollTo({ top: 0 });
+}
+function banner(id, text) { $(id).textContent = text || ""; $(id).hidden = !text; }
+function busy(btn, on, label) { btn.disabled = on; btn.replaceChildren(...(on ? [el("span", { className: "spinner" }), label] : [label])); }
+
+// ---------- step 1
+async function init() {
+  try {
+    const o = await api("/api/overview");
+    state.modules = o.modules;
+    const pill = $("llm"); pill.hidden = false;
+    pill.textContent = o.gemini ? "Gemini connected · " + o.model : "Gemini key not set – using basic matching";
+    pill.classList.toggle("off", !o.gemini);
+    o.examples.forEach(t => $("examples").append(el("button", { className: "chip", type: "button", textContent: t, onclick: () => { $("prompt").value = t; $("prompt").focus(); } })));
+    $("srcCount").textContent = "(" + o.modules.length + " report types)";
+    o.modules.forEach(m => $("sources").append(el("li", {}, el("b", { textContent: m.name }), " – " + m.description + " (" + m.source + ", " + m.rows.toLocaleString() + " records, " + m.dates + ")")));
+    if (!o.modules.length) banner("err1", "No data has been imported yet. Ask your administrator to load the crawl files.");
+  } catch (e) { banner("err1", e.message); }
+}
+$("go").onclick = async () => {
+  const prompt = $("prompt").value.trim();
+  if (prompt.length < 3) { banner("err1", "Tell us what the report should cover."); $("prompt").focus(); return; }
+  banner("err1"); busy($("go"), true, "Reading your request…");
+  try {
+    const p = await api("/api/plan", { prompt });
+    Object.assign(state, { prompt, module: p.module, fields: p.fields, values: p.values });
+    banner("warn2", p.warning);
+    renderForm(p.missing);
+    show(2);
+  } catch (e) { banner("err1", e.message); }
+  busy($("go"), false, "Continue");
+};
+
+// ---------- step 2
+function optionsFor(f) {
+  let o = f.options || [];
+  if (f.depends_on) { const parent = state.values[f.depends_on]; o = o.filter(x => x.parent === undefined || x.parent === parent); }
+  const seen = new Set(); return o.filter(x => !seen.has(x.value) && seen.add(x.value));
+}
+function control(f) {
+  const id = "f_" + f.key, v = state.values[f.key];
+  if (f.type === "select") {
+    const s = el("select", { id });
+    if (!f.required || v === undefined || v === "") s.append(el("option", { value: "", textContent: f.required ? "Choose…" : "— none —" }));
+    optionsFor(f).forEach(o => s.append(el("option", { value: o.value, textContent: o.label })));
+    s.value = v ?? "";
+    s.onchange = () => { state.values[f.key] = s.value || undefined; onChange(f); };
+    return s;
+  }
+  if (f.type === "multi") {
+    const wrap = el("div"), tags = el("div", { className: "tags" }), s = el("select", { id });
+    const draw = () => {
+      const cur = state.values[f.key] || [], opts = optionsFor(f);
+      tags.replaceChildren(...cur.map(val => el("span", { className: "tag" }, (opts.find(o => o.value === val) || {}).label || val,
+        el("button", { type: "button", ariaLabel: "Remove " + val, textContent: "×", onclick: () => { state.values[f.key] = cur.filter(x => x !== val); draw(); } }))));
+      s.replaceChildren(el("option", { value: "", textContent: cur.length ? "Add another…" : "All (no filter) – add one…" }),
+        ...opts.filter(o => !cur.includes(o.value)).map(o => el("option", { value: o.value, textContent: o.label })));
+    };
+    s.onchange = () => { if (s.value) { state.values[f.key] = [...(state.values[f.key] || []), s.value]; draw(); } };
+    draw(); wrap.append(tags, s); return wrap;
+  }
+  const i = el("input", { id, type: f.type === "number" ? "number" : f.type === "color" ? "color" : "text", value: v ?? "" });
+  if (f.type === "number") { i.min = 3; i.max = 25; }
+  if (f.type === "text") i.maxLength = 120;
+  i.oninput = () => { state.values[f.key] = i.value; i.closest(".field").classList.remove("missing"); };
+  return i;
+}
+function fieldNode(f, missing) {
+  const n = el("div", { className: "field" + (missing ? " missing" : "") + (f.type === "multi" || f.key === "title" ? " wide" : "") });
+  const lab = el("label", { className: "f", htmlFor: "f_" + f.key, textContent: f.label });
+  if (f.required) lab.append(el("span", { className: "req", textContent: "*", title: "Required" }));
+  n.append(lab, control(f), el("div", { className: "help", textContent: (missing ? "Needed – we couldn't find this in your request. " : "") + (f.help || "") }));
+  return n;
+}
+function renderForm(missing = []) {
+  $("echo").textContent = "“" + state.prompt + "”";
+  const typeField = { key: "__module", label: "Report type", type: "select", required: true, help: (state.modules.find(m => m.id === state.module) || {}).description || "Pick the kind of report you need.",
+    options: state.modules.map(m => ({ value: m.id, label: m.name })) };
+  state.values.__module = state.module || undefined;
+  const req = [typeField, ...state.fields.filter(f => f.required)], opt = state.fields.filter(f => !f.required);
+  $("required").replaceChildren(...req.map(f => fieldNode(f, missing.includes(f.key) || (f.key === "__module" && !state.module))));
+  $("optional").replaceChildren(...opt.map(f => fieldNode(f, false)));
+  $("optWrap").hidden = !opt.length;
+  // show the optional block when we picked something up from the request, so nothing is applied unseen
+  const common = ["title", "tone", "top_n", "accent"];
+  if (opt.some(f => !common.includes(f.key) && state.values[f.key] !== undefined && String(state.values[f.key]) !== "") || state.values.title) $("optWrap").open = true;
+  const names = req.filter(f => missing.includes(f.key) || (f.key === "__module" && !state.module)).map(f => f.label);
+  banner("need", names.length ? "We need " + names.length + " more detail" + (names.length > 1 ? "s" : "") + " before generating: " + names.join(", ") + "." : "");
+  $("genNote").textContent = "Takes about 10–30 seconds.";
+}
+async function onChange(f) {
+  if (f.key === "__module") {
+    const keep = {}; ["client_name", "format", "title", "tone", "top_n", "accent"].forEach(k => { if (state.values[k] !== undefined) keep[k] = state.values[k]; });
+    try {
+      const r = await api("/api/fields?module=" + encodeURIComponent(state.values.__module));
+      Object.assign(state, { module: state.values.__module, fields: r.fields, values: { ...r.values, ...keep } });
+      renderForm([]);
+    } catch (e) { banner("err2", e.message); }
+    return;
+  }
+  const kids = state.fields.filter(x => x.depends_on === f.key);
+  if (kids.length) { kids.forEach(k => delete state.values[k.key]); renderForm([]); }
+  else document.getElementById("f_" + f.key)?.closest(".field")?.classList.remove("missing");
+}
+$("form").onsubmit = async e => {
+  e.preventDefault(); banner("err2");
+  const req = state.fields.filter(f => f.required);
+  const miss = req.filter(f => { const v = state.values[f.key]; return v === undefined || v === "" || (typeof v === "string" && !v.trim()); });
+  if (!state.module || miss.length) {
+    renderForm(miss.map(f => f.key));
+    const first = !state.module ? "f___module" : "f_" + miss[0].key; $(first)?.focus(); return;
+  }
+  const values = { ...state.values }; delete values.__module;
+  busy($("gen"), true, "Building your report…"); $("back").disabled = true;
+  try {
+    const r = await api("/api/generate", { prompt: state.prompt, module: state.module, values });
+    $("rTitle").textContent = r.title; $("rHead").textContent = r.headline;
+    $("rMeta").textContent = r.pages + " page" + (r.pages > 1 ? "s" : "") + " · " + r.filename + " · commentary: " + (r.narrative_source === "gemini" ? "written by Gemini" : "standard template");
+    banner("warn3", r.warning);
+    $("dl").href = r.url + "?download=1"; $("open").href = r.url;$("viewer").src = r.url + "#view=FitH";
+    show(3);
+  } catch (err) { banner("err2", err.message); }
+  busy($("gen"), false, "Generate PDF"); $("back").disabled = false;
+};
+$("back").onclick = () => show(1);
+$("tweak").onclick = () => show(2);
+$("again").onclick = () => { $("prompt").value = ""; $("viewer").src = "about:blank"; show(1); $("prompt").focus(); };
+init();
+</script>
+</body>
+</html>
